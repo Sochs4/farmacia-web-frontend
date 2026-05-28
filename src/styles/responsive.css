@@ -1,0 +1,157 @@
+/* TABLET */
+@media (max-width: 900px) {
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    height: auto;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 14px;
+    gap: 10px;
+  }
+
+  .logo-area {
+    min-width: 120px;
+  }
+
+  .sidebar button {
+    min-width: 150px;
+    justify-content: center;
+    white-space: nowrap;
+  }
+
+  .main-content {
+    padding: 18px;
+  }
+
+  .cards,
+  .productos-stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .form-grid,
+  .venta-layout,
+  .productos-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .productos-toolbar {
+    flex-direction: column;
+  }
+
+  .productos-toolbar select {
+    max-width: 100%;
+  }
+
+  .tabla {
+    min-width: 760px;
+  }
+
+  .productos-panel {
+    overflow-x: auto;
+  }
+}
+
+/* TELÉFONO */
+@media (max-width: 520px) {
+  .login-page-new {
+    padding: 0;
+  }
+
+  .login-card-new {
+    width: 100%;
+    min-height: 100vh;
+    border-radius: 0;
+    grid-template-columns: 1fr;
+  }
+
+  .login-left {
+    padding: 28px 22px;
+    text-align: center;
+  }
+
+  .login-right {
+    padding: 28px 22px;
+  }
+
+  .layout {
+    flex-direction: column;
+  }
+
+  .sidebar {
+    width: 100%;
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    display: flex;
+    flex-direction: row;
+    overflow-x: auto;
+    padding: 10px;
+  }
+
+  .sidebar button {
+    min-width: 135px;
+    font-size: 13px;
+    padding: 11px;
+  }
+
+  .logo-img {
+    max-width: 90px;
+  }
+
+  .main-content {
+    padding: 14px;
+  }
+
+  .page-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 22px;
+  }
+
+  .page-header h1,
+  .productos-hero h1 {
+    font-size: 30px;
+  }
+
+  .cards,
+  .productos-stats {
+    grid-template-columns: 1fr;
+  }
+
+  .mini-stat {
+    padding: 16px;
+  }
+
+  .productos-panel {
+    padding: 18px;
+    border-radius: 18px;
+    overflow-x: auto;
+  }
+
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .btn-primary,
+  .login-btn-new {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .tabla {
+    min-width: 720px;
+    font-size: 13px;
+  }
+
+  .search-box {
+    width: 100%;
+  }
+
+  .productos-toolbar {
+    flex-direction: column;
+  }
+}
