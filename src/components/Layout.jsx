@@ -1,6 +1,7 @@
 import {
   LayoutDashboard,
   Pill,
+  PackagePlus,
   CreditCard,
   Boxes,
   CalendarClock,
@@ -33,6 +34,10 @@ function Layout({ children, setPantalla }) {
 
         <button onClick={() => setPantalla("productos")}>
           <Pill size={20} /> Productos
+        </button>
+
+        <button onClick={() => setPantalla("compras")}>
+          <PackagePlus size={20} /> Compras
         </button>
 
         <button onClick={() => setPantalla("vender")}>

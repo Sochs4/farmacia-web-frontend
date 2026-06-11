@@ -187,3 +187,25 @@
     grid-template-columns: 1fr;
   }
 }
+.report-tabs {
+  display: flex;
+  gap: 12px;
+  margin-top: 24px;
+  margin-bottom: 20px;
+}
+
+.report-tabs button {
+  border: none;
+  padding: 13px 24px;
+  border-radius: 16px;
+  background: #eaf7f5;
+  color: #0f3a46;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.report-tabs button.activo {
+  background: linear-gradient(135deg, #ef7f68, #d95f4d);
+  color: white;
+  box-shadow: 0 12px 24px rgba(239,127,104,0.25);
+}

@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import api from "../services/api";
+
 import {
   Wallet,
   ShoppingCart,
@@ -9,6 +10,7 @@ import {
   CalendarClock,
   Ban,
   Plus,
+  PackagePlus,
   ClipboardList,
   LayoutDashboard,
 } from "lucide-react";
@@ -21,11 +23,7 @@ function Dashboard({ setPantalla }) {
   const [proximos, setProximos] = useState([]);
   const [vencidos, setVencidos] = useState([]);
 
-  useEffect(() => {
-    cargarDashboard();
-  }, []);
-
-  const cargarDashboard = async () => {
+  async function cargarDashboard() {
     const r1 = await api.get("/Reportes/ventas-dia");
     const r2 = await api.get("/Productos");
     const r3 = await api.get("/Inventario/bajo-stock");
@@ -39,7 +37,11 @@ function Dashboard({ setPantalla }) {
     setAgotados(r4.data);
     setProximos(r5.data);
     setVencidos(r6.data);
-  };
+  }
+
+  useEffect(() => {
+    cargarDashboard();
+  }, []);
 
   return (
     <Layout setPantalla={setPantalla}>
@@ -122,6 +124,10 @@ function Dashboard({ setPantalla }) {
           <div className="quick-actions">
             <button onClick={() => setPantalla("productos")}>
               <Plus size={20} /> Agregar producto
+            </button>
+
+            <button onClick={() => setPantalla("compras")}>
+              <PackagePlus size={20} /> Registrar compra
             </button>
 
             <button onClick={() => setPantalla("inventario")}>

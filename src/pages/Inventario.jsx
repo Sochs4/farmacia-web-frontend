@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import Layout from "../components/Layout";
 import api from "../services/api";
 import { Boxes, PackageCheck, AlertTriangle, Ban, Search } from "lucide-react";
+import { formatearStockCompuesto } from "../utils/stock";
 
 function Inventario({ setPantalla }) {
   const [productos, setProductos] = useState([]);
@@ -10,24 +11,47 @@ function Inventario({ setPantalla }) {
   const [busqueda, setBusqueda] = useState("");
   const [filtro, setFiltro] = useState("todos");
 
-  useEffect(() => {
-    cargarInventario();
-  }, []);
-
-  const cargarInventario = async () => {
+  async function cargarInventario() {
     const r1 = await api.get("/Inventario/bajo-stock");
     const r2 = await api.get("/Inventario/agotados");
     const r3 = await api.get("/Productos");
 
+    const productosConPresentaciones = await Promise.all(
+      r3.data.map(async (producto) => {
+        try {
+          const res = await api.get(
+            `/PresentacionesProducto/producto/${producto.id}`
+          );
+
+          return {
+            ...producto,
+            presentaciones: res.data || [],
+          };
+        } catch {
+          return {
+            ...producto,
+            presentaciones: [],
+          };
+        }
+      })
+    );
+
     setBajoStock(r1.data);
     setAgotados(r2.data);
-    setProductos(r3.data);
-  };
+    setProductos(productosConPresentaciones);
+  }
+
+  useEffect(() => {
+    cargarInventario();
+  }, []);
 
   const productosFiltrados = productos.filter((p) => {
+    const nombre = p.nombre || "";
+    const categoria = p.categoria || "";
+
     const coincideBusqueda =
-      p.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-      p.categoria.toLowerCase().includes(busqueda.toLowerCase());
+      nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
+      categoria.toLowerCase().includes(busqueda.toLowerCase());
 
     const bajo = p.alertaStock && p.stock > 0 && p.stock <= p.stockMinimo;
     const agotado = p.stock <= 0;
@@ -39,6 +63,11 @@ function Inventario({ setPantalla }) {
     return coincideBusqueda;
   });
 
+  const hoy = new Date().toISOString().substring(0, 10);
+  const limiteVencimiento = new Date();
+  limiteVencimiento.setDate(limiteVencimiento.getDate() + 30);
+  const fechaLimite = limiteVencimiento.toISOString().substring(0, 10);
+
   return (
     <Layout setPantalla={setPantalla}>
       <div className="page-header">
@@ -49,7 +78,7 @@ function Inventario({ setPantalla }) {
         <div>
           <span>Control de stock</span>
           <h1>Inventario</h1>
-          <p>Consulta existencias, bajo stock y productos agotados.</p>
+          <p>Consulta existencias por unidad, caja, blister y presentación.</p>
         </div>
       </div>
 
@@ -105,33 +134,83 @@ function Inventario({ setPantalla }) {
             <tr>
               <th>Producto</th>
               <th>Categoría</th>
-              <th>Unidad</th>
-              <th>Stock</th>
+              <th>Stock total</th>
+              <th>Equivalencia</th>
               <th>Stock mínimo</th>
-              <th>Precio venta</th>
+              <th>Estado</th>
               <th>Vencimiento</th>
             </tr>
           </thead>
 
           <tbody>
-            {productosFiltrados.map((p) => (
-              <tr
-                key={p.id}
-                className={
-                  p.alertaStock && p.stock <= p.stockMinimo
-                    ? "fila-alerta"
-                    : ""
-                }
-              >
-                <td><strong>{p.nombre}</strong></td>
-                <td>{p.categoria}</td>
-                <td>{p.unidadMedida}</td>
-                <td>{p.stock}</td>
-                <td>{p.stockMinimo}</td>
-                <td>Q {Number(p.precioVenta).toFixed(2)}</td>
-                <td>{p.fechaVencimiento?.substring(0, 10)}</td>
-              </tr>
-            ))}
+            {productosFiltrados.map((p) => {
+              const bajo =
+                p.alertaStock && p.stock > 0 && p.stock <= p.stockMinimo;
+              const agotado = p.stock <= 0;
+              const vencimiento = p.fechaVencimiento?.substring(0, 10);
+              const vencido = vencimiento && vencimiento < hoy;
+              const proximoVencer =
+                vencimiento && vencimiento >= hoy && vencimiento <= fechaLimite;
+
+              return (
+                <tr
+                  key={p.id}
+                  className={
+                    vencido
+                      ? "fila-vencida"
+                      : proximoVencer
+                      ? "fila-proximo-vencer"
+                      : bajo || agotado
+                      ? "fila-alerta"
+                      : ""
+                  }
+                >
+                  <td>
+                    <strong>{p.nombre}</strong>
+                  </td>
+
+                  <td>{p.categoria}</td>
+
+                  <td>
+                    <strong>{p.stock}</strong> {p.unidadMedida}
+                  </td>
+
+                  <td>
+                    <strong>
+                      {formatearStockCompuesto(
+                        p.stock,
+                        p.presentaciones,
+                        p.unidadMedida
+                      )}
+                    </strong>
+                  </td>
+
+                  <td>{p.stockMinimo}</td>
+
+                  <td>
+                    {agotado ? (
+                      <span className="badge-danger">Agotado</span>
+                    ) : bajo ? (
+                      <span className="badge-warning">Bajo stock</span>
+                    ) : p.alertaStock ? (
+                      <span className="badge-success">Disponible</span>
+                    ) : (
+                      <span>Sin alerta</span>
+                    )}
+                  </td>
+
+                  <td>
+                    {vencido ? (
+                      <span className="badge-danger">{vencimiento}</span>
+                    ) : proximoVencer ? (
+                      <span className="badge-warning">{vencimiento}</span>
+                    ) : (
+                      vencimiento || "Sin fecha"
+                    )}
+                  </td>
+                </tr>
+              );
+            })}
           </tbody>
         </table>
       </div>
@@ -144,8 +223,7 @@ function Inventario({ setPantalla }) {
             <tr>
               <th>Producto</th>
               <th>Categoría</th>
-              <th>Unidad</th>
-              <th>Stock</th>
+              <th>Stock base</th>
               <th>Stock mínimo</th>
             </tr>
           </thead>
@@ -153,10 +231,11 @@ function Inventario({ setPantalla }) {
           <tbody>
             {bajoStock.map((p) => (
               <tr key={p.id} className="fila-alerta">
-                <td><strong>{p.nombre}</strong></td>
+                <td>
+                  <strong>{p.nombre}</strong>
+                </td>
                 <td>{p.categoria}</td>
-                <td>{p.unidadMedida}</td>
-                <td>{p.stock}</td>
+                <td>{p.stock} unidades</td>
                 <td>{p.stockMinimo}</td>
               </tr>
             ))}
@@ -172,18 +251,18 @@ function Inventario({ setPantalla }) {
             <tr>
               <th>Producto</th>
               <th>Categoría</th>
-              <th>Unidad</th>
-              <th>Stock</th>
+              <th>Stock base</th>
             </tr>
           </thead>
 
           <tbody>
             {agotados.map((p) => (
               <tr key={p.id} className="fila-alerta">
-                <td><strong>{p.nombre}</strong></td>
+                <td>
+                  <strong>{p.nombre}</strong>
+                </td>
                 <td>{p.categoria}</td>
-                <td>{p.unidadMedida}</td>
-                <td>{p.stock}</td>
+                <td>{p.stock} unidades</td>
               </tr>
             ))}
           </tbody>

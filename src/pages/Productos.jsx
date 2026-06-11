@@ -3,13 +3,14 @@ import Layout from "../components/Layout";
 import api from "../services/api";
 import {
   Plus,
-  Search,
-  Pencil,
-  Trash2,
   PackageCheck,
   AlertTriangle,
   Pill,
 } from "lucide-react";
+
+import FormularioProducto from "./productos/FormularioProducto";
+import PresentacionesProducto from "./productos/PresentacionesProducto";
+import TablaProductos from "./productos/TablaProductos";
 
 function Productos({ setPantalla }) {
   const productoVacio = {
@@ -19,6 +20,8 @@ function Productos({ setPantalla }) {
     unidadMedida: "",
     precioCompra: 0,
     precioVenta: 0,
+    cantidadPresentaciones: "",
+    contenidoCompra: 1,
     stock: 0,
     stockMinimo: 10,
     alertaStock: true,
@@ -26,38 +29,81 @@ function Productos({ setPantalla }) {
     activo: true,
   };
 
+  const presentacionVacia = {
+    id: 0,
+    nombre: "Unidad",
+    factorConversion: 1,
+    precioVenta: 0,
+    activo: true,
+  };
+
   const [productos, setProductos] = useState([]);
   const [producto, setProducto] = useState(productoVacio);
+  const [presentaciones, setPresentaciones] = useState([presentacionVacia]);
   const [editando, setEditando] = useState(false);
   const [busqueda, setBusqueda] = useState("");
   const [filtro, setFiltro] = useState("todos");
+
+  async function cargarProductos() {
+    const res = await api.get("/Productos");
+    setProductos(res.data);
+  }
 
   useEffect(() => {
     cargarProductos();
   }, []);
 
-  const cargarProductos = async () => {
-    const res = await api.get("/Productos");
-    setProductos(res.data);
+  const limpiarFormulario = () => {
+    setProducto(productoVacio);
+    setPresentaciones([presentacionVacia]);
+    setEditando(false);
   };
 
   const guardarProducto = async () => {
+    let productoId = producto.id;
+
     if (editando) {
       await api.put(`/Productos/${producto.id}`, producto);
     } else {
-      await api.post("/Productos", producto);
+      const res = await api.post("/Productos", producto);
+      productoId = res.data.id;
     }
 
-    setProducto(productoVacio);
-    setEditando(false);
+    for (const pres of presentaciones) {
+      if (pres.nombre.trim() !== "" && Number(pres.factorConversion) > 0) {
+        const data = {
+          productoId,
+          nombre: pres.nombre,
+          factorConversion: Number(pres.factorConversion),
+          precioVenta: Number(pres.precioVenta),
+          activo: true,
+        };
+
+        if (editando && pres.id && pres.id > 0) {
+          await api.put(`/PresentacionesProducto/${pres.id}`, {
+            ...data,
+            id: pres.id,
+          });
+        } else {
+          await api.post("/PresentacionesProducto", data);
+        }
+      }
+    }
+
+    limpiarFormulario();
     cargarProductos();
   };
 
-  const editarProducto = (p) => {
+  const editarProducto = async (p) => {
     setProducto({
       ...p,
+      cantidadPresentaciones: "",
+      contenidoCompra: p.contenidoCompra || 1,
       fechaVencimiento: p.fechaVencimiento?.substring(0, 10),
     });
+
+    const res = await api.get(`/PresentacionesProducto/producto/${p.id}`);
+    setPresentaciones(res.data.length > 0 ? res.data : [presentacionVacia]);
 
     setEditando(true);
   };
@@ -69,29 +115,8 @@ function Productos({ setPantalla }) {
     cargarProductos();
   };
 
-  const productosFiltrados = productos.filter((p) => {
-    const coincideBusqueda =
-      p.nombre.toLowerCase().includes(busqueda.toLowerCase()) ||
-      p.categoria.toLowerCase().includes(busqueda.toLowerCase());
-
-    const esBajoStock =
-      p.alertaStock &&
-      p.stock > 0 &&
-      p.stock <= p.stockMinimo;
-
-    const agotado = p.stock <= 0;
-
-    if (filtro === "bajo") return coincideBusqueda && esBajoStock;
-    if (filtro === "agotados") return coincideBusqueda && agotado;
-    if (filtro === "sinAlerta") return coincideBusqueda && !p.alertaStock;
-
-    return coincideBusqueda;
-  });
-
   return (
     <Layout setPantalla={setPantalla}>
-
-      {/* HEADER */}
       <div className="page-header">
         <div className="page-icon">
           <Pill size={34} />
@@ -100,11 +125,10 @@ function Productos({ setPantalla }) {
         <div>
           <span>Gestión de inventario</span>
           <h1>Productos</h1>
-          <p>Administra medicamentos, precios, stock y ganancias.</p>
+          <p>Administra medicamentos, presentaciones, stock y ganancias.</p>
         </div>
       </div>
 
-      {/* STATS */}
       <div className="productos-stats">
         <div className="mini-stat">
           <PackageCheck />
@@ -132,258 +156,45 @@ function Productos({ setPantalla }) {
         </div>
       </div>
 
-      {/* FORM */}
       <div className="productos-panel">
-        <h2>
-          {editando ? "Editar producto" : "Agregar producto"}
-        </h2>
+        <h2>{editando ? "Editar producto" : "Agregar producto"}</h2>
 
-        <div className="form-grid">
+        <FormularioProducto
+          producto={producto}
+          setProducto={setProducto}
+        />
 
-          <div className="campo">
-            <label>Nombre del producto</label>
-            <input
-              value={producto.nombre}
-              onChange={(e) =>
-                setProducto({
-                  ...producto,
-                  nombre: e.target.value,
-                })
-              }
-            />
-          </div>
-
-          <div className="campo">
-            <label>Categoría</label>
-            <input
-              value={producto.categoria}
-              onChange={(e) =>
-                setProducto({
-                  ...producto,
-                  categoria: e.target.value,
-                })
-              }
-            />
-          </div>
-
-          <div className="campo">
-            <label>Unidad</label>
-            <select
-              value={producto.unidadMedida}
-              onChange={(e) =>
-                setProducto({
-                  ...producto,
-                  unidadMedida: e.target.value,
-                })
-              }
-            >
-              <option value="">Seleccione</option>
-              <option value="Tableta">Tableta</option>
-              <option value="Unidad">Unidad</option>
-              <option value="Frasco">Frasco</option>
-              <option value="Caja">Caja</option>
-            </select>
-          </div>
-
-          <div className="campo">
-            <label>Precio compra</label>
-            <input
-              type="number"
-              value={producto.precioCompra}
-              onChange={(e) =>
-                setProducto({
-                  ...producto,
-                  precioCompra: Number(e.target.value),
-                })
-              }
-            />
-          </div>
-
-          <div className="campo">
-            <label>Precio venta</label>
-            <input
-              type="number"
-              value={producto.precioVenta}
-              onChange={(e) =>
-                setProducto({
-                  ...producto,
-                  precioVenta: Number(e.target.value),
-                })
-              }
-            />
-          </div>
-
-          <div className="campo">
-            <label>Stock</label>
-            <input
-              type="number"
-              value={producto.stock}
-              onChange={(e) =>
-                setProducto({
-                  ...producto,
-                  stock: Number(e.target.value),
-                })
-              }
-            />
-          </div>
-
-          <div className="campo">
-            <label>Stock mínimo</label>
-            <input
-              type="number"
-              value={producto.stockMinimo}
-              onChange={(e) =>
-                setProducto({
-                  ...producto,
-                  stockMinimo: Number(e.target.value),
-                })
-              }
-            />
-          </div>
-
-          <div className="campo">
-            <label>Alerta</label>
-            <select
-              value={producto.alertaStock ? "true" : "false"}
-              onChange={(e) =>
-                setProducto({
-                  ...producto,
-                  alertaStock: e.target.value === "true",
-                })
-              }
-            >
-              <option value="true">Sí</option>
-              <option value="false">No</option>
-            </select>
-          </div>
-
-          <div className="campo">
-            <label>Vencimiento</label>
-            <input
-              type="date"
-              value={producto.fechaVencimiento}
-              onChange={(e) =>
-                setProducto({
-                  ...producto,
-                  fechaVencimiento: e.target.value,
-                })
-              }
-            />
-          </div>
-        </div>
+        <PresentacionesProducto
+          presentaciones={presentaciones}
+          setPresentaciones={setPresentaciones}
+        />
 
         <button className="btn-primary" onClick={guardarProducto}>
           <Plus size={18} />
           {editando ? "Actualizar" : "Guardar"}
         </button>
-      </div>
 
-      {/* TABLA */}
-      <div className="productos-panel">
-
-        <div className="productos-toolbar">
-          <div className="search-box">
-            <Search size={18} />
-            <input
-              placeholder="Buscar producto..."
-              value={busqueda}
-              onChange={(e) => setBusqueda(e.target.value)}
-            />
-          </div>
-
-          <select
-            value={filtro}
-            onChange={(e) => setFiltro(e.target.value)}
+        {editando && (
+          <button
+            className="btn-delete"
+            type="button"
+            onClick={limpiarFormulario}
+            style={{ marginLeft: "10px" }}
           >
-            <option value="todos">Todos</option>
-            <option value="bajo">Bajo stock</option>
-            <option value="agotados">Agotados</option>
-          </select>
-        </div>
-
-        <table className="tabla productos-tabla">
-          <thead>
-            <tr>
-              <th>Producto</th>
-              <th>Categoría</th>
-              <th>Stock</th>
-              <th>Compra</th>
-              <th>Venta</th>
-              <th>Ganancia</th>
-              <th>Margen %</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-
-          <tbody>
-            {productosFiltrados.map((p) => {
-
-              const ganancia =
-                Number(p.precioVenta) - Number(p.precioCompra);
-
-              const margen =
-                p.precioCompra > 0
-                  ? (
-                      (ganancia / Number(p.precioCompra)) *
-                      100
-                    ).toFixed(2)
-                  : 0;
-
-              return (
-                <tr
-                  key={p.id}
-                  className={
-                    p.alertaStock &&
-                    p.stock <= p.stockMinimo
-                      ? "fila-alerta"
-                      : ""
-                  }
-                >
-                  <td>
-                    <strong>{p.nombre}</strong>
-                  </td>
-
-                  <td>{p.categoria}</td>
-
-                  <td>{p.stock}</td>
-
-                  <td>
-                    Q {Number(p.precioCompra).toFixed(2)}
-                  </td>
-
-                  <td>
-                    Q {Number(p.precioVenta).toFixed(2)}
-                  </td>
-
-                  <td style={{ color: "#16a34a", fontWeight: "800" }}>
-                    Q {ganancia.toFixed(2)}
-                  </td>
-
-                  <td style={{ color: "#2563eb", fontWeight: "800" }}>
-                    {margen}%
-                  </td>
-
-                  <td>
-                    <button
-                      className="btn-edit"
-                      onClick={() => editarProducto(p)}
-                    >
-                      <Pencil size={16} />
-                    </button>
-
-                    <button
-                      className="btn-delete"
-                      onClick={() => eliminarProducto(p.id)}
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-          </tbody>
-        </table>
+            Cancelar
+          </button>
+        )}
       </div>
+
+      <TablaProductos
+        productos={productos}
+        busqueda={busqueda}
+        setBusqueda={setBusqueda}
+        filtro={filtro}
+        setFiltro={setFiltro}
+        editarProducto={editarProducto}
+        eliminarProducto={eliminarProducto}
+      />
     </Layout>
   );
 }

@@ -3,7 +3,6 @@ import Layout from "../components/Layout";
 import api from "../services/api";
 import {
   CalendarClock,
-  AlertTriangle,
   Ban,
 } from "lucide-react";
 
@@ -11,11 +10,7 @@ function Vencimientos({ setPantalla }) {
   const [proximos, setProximos] = useState([]);
   const [vencidos, setVencidos] = useState([]);
 
-  useEffect(() => {
-    cargarVencimientos();
-  }, []);
-
-  const cargarVencimientos = async () => {
+  async function cargarVencimientos() {
     try {
       const r1 = await api.get("/Inventario/proximos-vencer");
       const r2 = await api.get("/Inventario/vencidos");
@@ -25,7 +20,11 @@ function Vencimientos({ setPantalla }) {
     } catch (error) {
       console.log(error);
     }
-  };
+  }
+
+  useEffect(() => {
+    cargarVencimientos();
+  }, []);
 
   return (
     <Layout setPantalla={setPantalla}>
@@ -81,13 +80,15 @@ function Vencimientos({ setPantalla }) {
             {proximos.map((p) => (
               <tr
                 key={p.id}
-                className="fila-alerta"
+                className="fila-proximo-vencer"
               >
                 <td>{p.nombre}</td>
                 <td>{p.categoria}</td>
                 <td>{p.stock}</td>
                 <td>
-                  {p.fechaVencimiento?.substring(0, 10)}
+                  <span className="badge-warning">
+                    {p.fechaVencimiento?.substring(0, 10)}
+                  </span>
                 </td>
               </tr>
             ))}
@@ -119,7 +120,9 @@ function Vencimientos({ setPantalla }) {
                 <td>{p.categoria}</td>
                 <td>{p.stock}</td>
                 <td>
-                  {p.fechaVencimiento?.substring(0, 10)}
+                  <span className="badge-danger">
+                    {p.fechaVencimiento?.substring(0, 10)}
+                  </span>
                 </td>
               </tr>
             ))}

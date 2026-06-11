@@ -8,8 +8,128 @@ html, body, #root {
   box-sizing: border-box;
 }
 
+:root {
+  --azul-oscuro: #123f4d;
+  --azul-sidebar: #1f5363;
+  --azul-card: #2f7c8c;
+  --menta: #b9ded9;
+  --menta-claro: #e8f4f2;
+  --coral: #ef7f68;
+  --coral-suave: #f6b2a4;
+  --texto: #12333d;
+  --gris: #6b7c85;
+  --blanco: #ffffff;
+}
+
 body {
-  margin: 0;
   font-family: "Segoe UI", Arial, sans-serif;
-  background: linear-gradient(135deg, #eaf7f0, #eef3f6);
+  background: linear-gradient(135deg, #e8f4f2, #f7fbfb);
+  color: var(--texto);
+}
+
+/* BOTONES CANTIDAD EN VENTA */
+.cantidad-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 12px;
+}
+
+.cantidad-control button {
+  width: 46px;
+  height: 46px;
+  border-radius: 14px;
+  border: none;
+  font-size: 20px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.cantidad-control input {
+  width: 75px;
+  height: 46px;
+  border-radius: 14px;
+  text-align: center;
+  font-size: 20px;
+  font-weight: bold;
+}
+
+/* quitar flechitas feas del input number */
+.cantidad-control input::-webkit-inner-spin-button,
+.cantidad-control input::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+.cantidad-control input {
+  -moz-appearance: textfield;
+}
+
+/* MODAL TICKET */
+.ticket-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+  padding: 20px;
+}
+
+.ticket-question {
+  background: white;
+  width: 100%;
+  max-width: 360px;
+  border-radius: 24px;
+  padding: 28px 22px;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.25);
+}
+
+.ticket-question h2 {
+  margin-top: 12px;
+  font-size: 26px;
+  color: #123f4a;
+}
+
+.ticket-question p {
+  color: #333;
+  margin-bottom: 22px;
+}
+
+.ticket-question-actions {
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+}
+
+.ticket-question-actions button {
+  min-height: 48px;
+  border-radius: 16px;
+  padding: 0 18px;
+  font-weight: bold;
+}
+
+/* RESPONSIVE TELÉFONO */
+@media (max-width: 600px) {
+  .ticket-question-actions {
+    flex-direction: column;
+  }
+
+  .ticket-question-actions button {
+    width: 100%;
+  }
+
+  .carrito-item {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 10px;
+  }
+
+  .cantidad-control {
+    justify-content: center;
+  }
 }

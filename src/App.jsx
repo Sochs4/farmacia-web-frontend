@@ -4,11 +4,13 @@ import { Toaster } from "react-hot-toast";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Productos from "./pages/Productos";
-import Vender from "./pages/Vender";
+import Compras from "./pages/Compras";
+import Vender from "./pages/Vender/Vender";
 import Inventario from "./pages/Inventario";
 import Vencimientos from "./pages/Vencimientos";
 import Reportes from "./pages/Reportes";
 import Configuracion from "./pages/Configuracion";
+
 
 // 🔥 IMPORTAR TODOS LOS ESTILOS
 import "./App.css";
@@ -35,6 +37,10 @@ function App() {
 
       {pantalla === "productos" && (
         <Productos setPantalla={setPantalla} />
+      )}
+
+      {pantalla === "compras" && (
+        <Compras setPantalla={setPantalla} />
       )}
 
       {pantalla === "vender" && (
