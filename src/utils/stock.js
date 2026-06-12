@@ -12,6 +12,16 @@ export function formatearStockCompuesto(stockBase, presentaciones = [], unidadMi
     .filter((p) => p?.activo !== false && Number(p?.factorConversion) > 0)
     .sort((a, b) => Number(b.factorConversion) - Number(a.factorConversion));
 
+  const presentacionUnidad = opciones.find(
+    (p) => Number(p.factorConversion) === 1
+  );
+  const usaPresentacionesMayores = opciones.some(
+    (p) => Number(p.factorConversion) > 1
+  );
+  const nombreUnidadMinima =
+    presentacionUnidad?.nombre ||
+    (usaPresentacionesMayores ? "Unidad" : unidadMinima || "Unidad");
+
   const partes = [];
 
   for (const presentacion of opciones) {
@@ -25,11 +35,11 @@ export function formatearStockCompuesto(stockBase, presentaciones = [], unidadMi
   }
 
   if (restante > 0) {
-    partes.push(`${restante} ${unidadMinima || "Unidad"}`);
+    partes.push(`${restante} ${nombreUnidadMinima}`);
   }
 
   if (partes.length === 0) {
-    return `0 ${unidadMinima || "Unidad"}`;
+    return `0 ${nombreUnidadMinima}`;
   }
 
   return partes.join(" y ");

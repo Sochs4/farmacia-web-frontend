@@ -85,7 +85,7 @@ function TablaProductos({
                 <td>{p.unidadMedida}</td>
 
                 <td>
-                  {p.stock} {p.unidadMedida}
+                  {p.stock} unidades
                 </td>
 
                 <td>Q {Number(p.precioCompra).toFixed(2)}</td>

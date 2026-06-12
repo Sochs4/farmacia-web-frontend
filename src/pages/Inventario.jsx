@@ -172,7 +172,7 @@ function Inventario({ setPantalla }) {
                   <td>{p.categoria}</td>
 
                   <td>
-                    <strong>{p.stock}</strong> {p.unidadMedida}
+                    <strong>{p.stock}</strong> unidades
                   </td>
 
                   <td>

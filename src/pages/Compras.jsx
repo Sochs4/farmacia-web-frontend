@@ -45,15 +45,19 @@ function Compras({ setPantalla }) {
 
   const opcionesPresentacion = useMemo(() => {
     if (!productoSeleccionado) return [];
+    const tieneUnidadConfigurada = presentaciones.some(
+      (p) => Number(p.factorConversion) === 1
+    );
+    const usaPresentacionesMayores = presentaciones.some(
+      (p) => Number(p.factorConversion) > 1
+    );
+    const unidadMinima = usaPresentacionesMayores
+      ? "Unidad"
+      : productoSeleccionado.unidadMedida || "Unidad";
 
-    return [
-      {
-        id: "",
-        nombre: productoSeleccionado.unidadMedida || "Unidad",
-        factorConversion: 1,
-      },
-      ...presentaciones,
-    ];
+    if (tieneUnidadConfigurada) return presentaciones;
+
+    return [{ id: "", nombre: unidadMinima, factorConversion: 1 }, ...presentaciones];
   }, [productoSeleccionado, presentaciones]);
 
   const presentacionSeleccionada =
@@ -184,7 +188,7 @@ function Compras({ setPantalla }) {
                   <strong>{p.nombre}</strong>
                   <small>{p.categoria || "Sin categoría"}</small>
                 </span>
-                <b>{p.stock} {p.unidadMedida}</b>
+                <b>{p.stock} unidades</b>
               </button>
             ))}
           </div>
@@ -268,7 +272,7 @@ function Compras({ setPantalla }) {
                 <div>
                   <span>Entrarán</span>
                   <strong>
-                    {unidadesIngresadas} {productoSeleccionado.unidadMedida}
+                    {unidadesIngresadas} unidades
                   </strong>
                 </div>
 
