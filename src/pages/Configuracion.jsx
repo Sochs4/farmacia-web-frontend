@@ -2,7 +2,16 @@ import { useState } from "react";
 import toast from "react-hot-toast";
 import api from "../services/api";
 import Layout from "../components/Layout";
-import { Settings, Lock, ShieldCheck, LogOut } from "lucide-react";
+import {
+  Settings,
+  Lock,
+  ShieldCheck,
+  LogOut,
+  Boxes,
+  CalendarClock,
+  FileText,
+  Users,
+} from "lucide-react";
 import { UsuariosAdmin } from "./Usuarios";
 import { esAdmin } from "../utils/permisos";
 
@@ -45,6 +54,20 @@ export default function Configuracion({ setPantalla }) {
     setPantalla("login");
   };
 
+  const irAUsuarios = () => {
+    document.getElementById("admin-usuarios")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
+
+  const irASeguridad = () => {
+    document.getElementById("config-seguridad")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  };
+
   return (
     <Layout setPantalla={setPantalla}>
       <div className="page-header">
@@ -58,6 +81,43 @@ export default function Configuracion({ setPantalla }) {
           <p>Administra la seguridad de tu cuenta.</p>
         </div>
       </div>
+
+      {admin && (
+        <div className="productos-panel admin-mobile-menu-panel">
+          <h2>Menu administrativo</h2>
+          <div className="admin-menu-grid">
+            <button type="button" onClick={() => setPantalla("inventario")}>
+              <Boxes size={20} />
+              Inventario
+            </button>
+
+            <button type="button" onClick={() => setPantalla("vencimientos")}>
+              <CalendarClock size={20} />
+              Vencimientos
+            </button>
+
+            <button type="button" onClick={() => setPantalla("reportes")}>
+              <FileText size={20} />
+              Reportes
+            </button>
+
+            <button type="button" onClick={irASeguridad}>
+              <Settings size={20} />
+              Configuracion
+            </button>
+
+            <button type="button" onClick={irAUsuarios}>
+              <Users size={20} />
+              Usuarios
+            </button>
+
+            <button type="button" className="admin-menu-logout" onClick={cerrarSesion}>
+              <LogOut size={20} />
+              Cerrar sesion
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="productos-stats">
         <div className="mini-stat">
@@ -77,7 +137,7 @@ export default function Configuracion({ setPantalla }) {
         </div>
       </div>
 
-      <div className="productos-panel">
+      <div className="productos-panel" id="config-seguridad">
         <h2>Cambiar contrasena</h2>
 
         <form onSubmit={cambiarPassword}>
@@ -130,7 +190,7 @@ export default function Configuracion({ setPantalla }) {
 
       {admin && (
         <>
-          <div className="config-section-title">
+          <div className="config-section-title" id="admin-usuarios">
             <h2>Administrar usuarios</h2>
             <p>Crear vendedores, cambiar roles y activar o desactivar accesos.</p>
           </div>

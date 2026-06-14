@@ -2,12 +2,29 @@ import { useEffect, useMemo, useState } from "react";
 import toast from "react-hot-toast";
 import Layout from "../components/Layout";
 import api from "../services/api";
-import { PackagePlus, Save, Search, Boxes, Wallet } from "lucide-react";
+import {
+  PackagePlus,
+  Save,
+  Search,
+  Boxes,
+  Wallet,
+  History,
+  RefreshCw,
+} from "lucide-react";
 import { formatearStockCompuesto } from "../utils/stock";
+
+const formatearFecha = (fecha) =>
+  fecha ? new Date(fecha).toLocaleDateString("es-GT") : "-";
+
+const formatearMoneda = (valor) =>
+  valor === null || valor === undefined || valor === ""
+    ? "-"
+    : `Q ${Number(valor).toFixed(2)}`;
 
 function Compras({ setPantalla }) {
   const [productos, setProductos] = useState([]);
   const [presentaciones, setPresentaciones] = useState([]);
+  const [historialCompras, setHistorialCompras] = useState([]);
   const [productoId, setProductoId] = useState("");
   const [presentacionId, setPresentacionId] = useState("");
   const [cantidad, setCantidad] = useState(1);
@@ -17,6 +34,8 @@ function Compras({ setPantalla }) {
   const [busqueda, setBusqueda] = useState("");
   const [resultado, setResultado] = useState(null);
   const [guardando, setGuardando] = useState(false);
+  const [cargandoHistorial, setCargandoHistorial] = useState(false);
+  const [historialError, setHistorialError] = useState("");
 
   async function cargarProductos() {
     const res = await api.get("/Productos");
@@ -33,8 +52,25 @@ function Compras({ setPantalla }) {
     setPresentaciones(res.data || []);
   }
 
+  async function cargarHistorialCompras() {
+    try {
+      setCargandoHistorial(true);
+      setHistorialError("");
+
+      const res = await api.get("/Compras?top=100");
+      setHistorialCompras(res.data || []);
+    } catch (error) {
+      setHistorialError(
+        error.response?.data || "No se pudo cargar el historial de compras."
+      );
+    } finally {
+      setCargandoHistorial(false);
+    }
+  }
+
   useEffect(() => {
     cargarProductos();
+    cargarHistorialCompras();
   }, []);
 
   useEffect(() => {
@@ -121,7 +157,7 @@ function Compras({ setPantalla }) {
       setResultado(res.data);
       setCantidad(1);
 
-      await cargarProductos();
+      await Promise.all([cargarProductos(), cargarHistorialCompras()]);
     } catch (error) {
       toast.error(error.response?.data || "No se pudo registrar la compra.");
     } finally {
@@ -140,6 +176,14 @@ function Compras({ setPantalla }) {
           <span>Entrada de producto</span>
           <h1>Compras</h1>
           <p>Registra producto recibido y actualiza stock por presentación.</p>
+        </div>
+
+        <div className="mini-stat">
+          <History />
+          <div>
+            <p>Compras registradas</p>
+            <strong>{historialCompras.length}</strong>
+          </div>
         </div>
       </div>
 
@@ -305,6 +349,90 @@ function Compras({ setPantalla }) {
             </div>
           )}
         </div>
+      </div>
+
+      <div className="productos-panel historial-compras-panel">
+        <div className="historial-header">
+          <div>
+            <h2>Historial de compras</h2>
+            <p>Ultimas entradas registradas y su impacto en inventario.</p>
+          </div>
+
+          <button
+            className="btn-edit"
+            type="button"
+            onClick={cargarHistorialCompras}
+            disabled={cargandoHistorial}
+          >
+            <RefreshCw size={16} />
+            {cargandoHistorial ? "Actualizando..." : "Actualizar"}
+          </button>
+        </div>
+
+        {historialError && (
+          <div className="compra-resultado compra-error">
+            <strong>Historial no disponible</strong>
+            <span>{historialError}</span>
+          </div>
+        )}
+
+        <table className="tabla productos-tabla historial-compras-tabla">
+          <thead>
+            <tr>
+              <th>Fecha</th>
+              <th>Producto</th>
+              <th>Entrada</th>
+              <th>Unidades</th>
+              <th>Stock</th>
+              <th>Costos</th>
+              <th>Vencimiento</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {historialCompras.length === 0 ? (
+              <tr>
+                <td colSpan="7" className="tabla-empty">
+                  Aun no hay compras registradas.
+                </td>
+              </tr>
+            ) : (
+              historialCompras.map((compra) => (
+                <tr key={compra.id}>
+                  <td>{formatearFecha(compra.fecha)}</td>
+                  <td>
+                    <span className="cell-stack">
+                      <strong>{compra.productoNombre}</strong>
+                      <small>Compra #{compra.id}</small>
+                    </span>
+                  </td>
+                  <td>
+                    <span className="cell-stack">
+                      <strong>
+                        {compra.cantidadRecibida} {compra.presentacionNombre}
+                      </strong>
+                      <small>Factor x{compra.factorConversion}</small>
+                    </span>
+                  </td>
+                  <td>{compra.unidadesIngresadas} unidades</td>
+                  <td>
+                    <span className="cell-stack">
+                      <strong>{compra.stockActual}</strong>
+                      <small>Antes: {compra.stockAnterior}</small>
+                    </span>
+                  </td>
+                  <td>
+                    <span className="cell-stack">
+                      <strong>{formatearMoneda(compra.precioCompraTotal)}</strong>
+                      <small>Venta min.: {formatearMoneda(compra.precioVentaUnidad)}</small>
+                    </span>
+                  </td>
+                  <td>{formatearFecha(compra.fechaVencimiento)}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
       </div>
     </Layout>
   );

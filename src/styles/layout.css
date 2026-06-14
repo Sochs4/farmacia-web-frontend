@@ -64,6 +64,10 @@
   box-shadow: 0 0 18px rgba(101, 255, 241, 0.28);
 }
 
+.nav-text-mobile {
+  display: none;
+}
+
 .logout {
   margin-top: auto !important;
   background: linear-gradient(135deg, #ef7f68, #d95f4d) !important;

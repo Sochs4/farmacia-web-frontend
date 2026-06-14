@@ -19,27 +19,36 @@ import { ROLES, obtenerUsuarioActual, puedeVerPantalla } from "../utils/permisos
 function Layout({ children, setPantalla }) {
   const usuario = obtenerUsuarioActual();
   const vendedor = usuario?.rol === ROLES.VENDEDOR;
+  const admin = usuario?.rol === ROLES.ADMIN;
 
   const opciones = [
     {
       pantalla: "dashboard",
       texto: "Dashboard",
       icono: <LayoutDashboard size={20} />,
+      adminMobilePrincipal: true,
+      adminMobileOrden: 1,
     },
     {
       pantalla: "productos",
       texto: "Productos",
       icono: <Pill size={20} />,
+      adminMobilePrincipal: true,
+      adminMobileOrden: 3,
     },
     {
       pantalla: "compras",
       texto: "Compras",
       icono: <PackagePlus size={20} />,
+      adminMobilePrincipal: true,
+      adminMobileOrden: 4,
     },
     {
       pantalla: "vender",
       texto: "Vender",
       icono: <CreditCard size={20} />,
+      adminMobilePrincipal: true,
+      adminMobileOrden: 2,
     },
     {
       pantalla: "inventario",
@@ -59,7 +68,10 @@ function Layout({ children, setPantalla }) {
     {
       pantalla: "configuracion",
       texto: "Configuracion",
+      textoMovil: "Menu",
       icono: <Settings size={20} />,
+      adminMobilePrincipal: true,
+      adminMobileOrden: 5,
     },
   ];
 
@@ -95,6 +107,22 @@ function Layout({ children, setPantalla }) {
     (opcion) => puedeVerPantalla(usuario, opcion.pantalla),
   );
 
+  const sidebarClases = [
+    "sidebar",
+    vendedor ? "vendedor-sidebar" : "",
+    admin ? "admin-sidebar" : "",
+  ]
+    .filter(Boolean)
+    .join(" ");
+
+  const obtenerClaseOpcion = (opcion) => {
+    if (!admin) return "";
+
+    return opcion.adminMobilePrincipal
+      ? "admin-mobile-principal"
+      : "admin-mobile-extra";
+  };
+
   const cerrarSesion = () => {
     localStorage.removeItem("usuario");
     setPantalla("login");
@@ -102,7 +130,7 @@ function Layout({ children, setPantalla }) {
 
   return (
     <div className="layout">
-      <aside className={vendedor ? "sidebar vendedor-sidebar" : "sidebar"}>
+      <aside className={sidebarClases}>
         <h2 className="logo-area">
           <img src={logo} alt="Logo" className="logo-img" />
         </h2>
@@ -110,14 +138,26 @@ function Layout({ children, setPantalla }) {
         {opcionesVisibles.map((opcion) => (
           <button
             key={opcion.pantalla}
+            className={obtenerClaseOpcion(opcion)}
+            style={
+              opcion.adminMobileOrden
+                ? { "--mobile-order": opcion.adminMobileOrden }
+                : undefined
+            }
             onClick={() => setPantalla(opcion.pantalla)}
           >
-            {opcion.icono} {opcion.texto}
+            {opcion.icono}
+            <span className="nav-text nav-text-desktop">{opcion.texto}</span>
+            <span className="nav-text nav-text-mobile">
+              {opcion.textoMovil || opcion.texto}
+            </span>
           </button>
         ))}
 
         <button className="logout" onClick={cerrarSesion}>
-          <LogOut size={20} /> Cerrar sesion
+          <LogOut size={20} />
+          <span className="nav-text nav-text-desktop">Cerrar sesion</span>
+          <span className="nav-text nav-text-mobile">Salir</span>
         </button>
       </aside>
 

@@ -346,6 +346,67 @@
   color: #166534;
 }
 
+.compra-error {
+  background: #fff0ed;
+  border-color: #fecaca;
+}
+
+.compra-error span {
+  color: #991b1b;
+}
+
+.historial-compras-panel {
+  overflow-x: auto;
+}
+
+.historial-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.historial-header h2 {
+  margin: 0 0 6px;
+}
+
+.historial-header p {
+  margin: 0;
+  color: #647b83;
+  font-weight: 700;
+}
+
+.historial-header .btn-edit {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.historial-compras-tabla {
+  min-width: 920px;
+}
+
+.cell-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.cell-stack small {
+  color: #647b83;
+  font-size: 12px;
+  font-weight: 800;
+}
+
+.tabla-empty {
+  text-align: center;
+  color: #647b83 !important;
+  font-weight: 800;
+}
+
 .config-section-title {
   margin-top: 28px;
   margin-bottom: 12px;
@@ -368,6 +429,52 @@
   justify-content: center;
   gap: 8px;
   margin-top: 14px;
+}
+
+.admin-mobile-menu-panel {
+  display: none;
+}
+
+.admin-menu-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px;
+}
+
+.admin-menu-grid button {
+  min-height: 52px;
+  border: 1px solid rgba(47, 124, 140, 0.24);
+  border-radius: 14px;
+  background: #eaf7f5;
+  color: #0f3a46;
+  font-weight: 900;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.admin-menu-grid button:hover {
+  background: #2f7c8c;
+  color: white;
+  transform: translateY(-1px);
+}
+
+.admin-menu-grid button svg {
+  color: #2f7c8c;
+}
+
+.admin-menu-grid button:hover svg,
+.admin-menu-grid .admin-menu-logout,
+.admin-menu-grid .admin-menu-logout svg {
+  color: white;
+}
+
+.admin-menu-grid .admin-menu-logout {
+  background: linear-gradient(135deg, #ef7f68, #d95f4d);
+  border-color: rgba(255, 210, 198, 0.8);
 }
 
 @media (max-width: 1100px) {

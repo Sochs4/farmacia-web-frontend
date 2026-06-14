@@ -230,7 +230,16 @@
     margin-top: 0 !important;
   }
 
-  .vendedor-sidebar {
+  .nav-text-desktop {
+    display: none;
+  }
+
+  .nav-text-mobile {
+    display: inline;
+  }
+
+  .vendedor-sidebar,
+  .admin-sidebar {
     height: 74px;
     display: grid;
     grid-template-columns: repeat(5, minmax(0, 1fr));
@@ -244,11 +253,19 @@
   }
 
   .vendedor-sidebar .logo-area,
-  .vendedor-sidebar .logout {
+  .vendedor-sidebar .logout,
+  .admin-sidebar .logo-area,
+  .admin-sidebar .logout,
+  .admin-sidebar .admin-mobile-extra {
     display: none;
   }
 
-  .vendedor-sidebar button {
+  .admin-sidebar .admin-mobile-principal {
+    order: var(--mobile-order);
+  }
+
+  .vendedor-sidebar button,
+  .admin-sidebar button {
     min-width: 0;
     width: 100%;
     height: 58px;
@@ -262,14 +279,16 @@
     font-weight: 800;
   }
 
-  .vendedor-sidebar button:hover {
+  .vendedor-sidebar button:hover,
+  .admin-sidebar button:hover {
     transform: none;
     background: rgba(101, 255, 241, 0.13);
     border-color: transparent;
     box-shadow: none;
   }
 
-  .vendedor-sidebar button svg {
+  .vendedor-sidebar button svg,
+  .admin-sidebar button svg {
     width: 21px;
     height: 21px;
     color: #65fff1;
@@ -313,6 +332,10 @@
     margin-top: 16px;
   }
 
+  .admin-mobile-menu-panel {
+    display: block;
+  }
+
   .productos-panel h2,
   .panel h2,
   .pharma-panel h2,
@@ -346,6 +369,14 @@
   .productos-toolbar {
     flex-direction: column;
     gap: 12px;
+  }
+
+  .historial-header {
+    flex-direction: column;
+  }
+
+  .historial-header .btn-edit {
+    width: 100%;
   }
 
   .search-box,
