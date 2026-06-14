@@ -1,5 +1,6 @@
 import { useState } from "react";
 import api from "../services/api";
+import { obtenerPantallaInicial } from "../utils/permisos";
 
 import {
   User,
@@ -49,7 +50,7 @@ function Login({ setPantalla }) {
       setError("");
 
       setTimeout(() => {
-        setPantalla("dashboard");
+        setPantalla(obtenerPantallaInicial(response.data));
       }, 800);
     } catch {
       setError("Usuario o contraseña incorrectos");

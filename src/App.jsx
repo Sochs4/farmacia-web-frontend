@@ -10,6 +10,11 @@ import Inventario from "./pages/Inventario";
 import Vencimientos from "./pages/Vencimientos";
 import Reportes from "./pages/Reportes";
 import Configuracion from "./pages/Configuracion";
+import {
+  obtenerPantallaInicial,
+  obtenerUsuarioActual,
+  puedeVerPantalla,
+} from "./utils/permisos";
 
 
 // 🔥 IMPORTAR TODOS LOS ESTILOS
@@ -23,43 +28,63 @@ import "./styles/ventas.css";
 import "./styles/responsive.css";
 
 function App() {
-  const [pantalla, setPantalla] = useState("login");
+  const [pantalla, setPantallaBase] = useState(() => {
+    const usuario = obtenerUsuarioActual();
+    return usuario ? obtenerPantallaInicial(usuario) : "login";
+  });
+
+  const setPantalla = (nuevaPantalla) => {
+    const usuario = obtenerUsuarioActual();
+
+    if (nuevaPantalla === "login" || puedeVerPantalla(usuario, nuevaPantalla)) {
+      setPantallaBase(nuevaPantalla);
+      return;
+    }
+
+    setPantallaBase(obtenerPantallaInicial(usuario));
+  };
+
+  const usuario = obtenerUsuarioActual();
+  const pantallaActiva =
+    pantalla === "login" || puedeVerPantalla(usuario, pantalla)
+      ? pantalla
+      : obtenerPantallaInicial(usuario);
 
   return (
     <>
       <Toaster position="top-right" />
 
-      {pantalla === "login" && <Login setPantalla={setPantalla} />}
+      {pantallaActiva === "login" && <Login setPantalla={setPantalla} />}
 
-      {pantalla === "dashboard" && (
+      {pantallaActiva === "dashboard" && (
         <Dashboard setPantalla={setPantalla} />
       )}
 
-      {pantalla === "productos" && (
+      {pantallaActiva === "productos" && (
         <Productos setPantalla={setPantalla} />
       )}
 
-      {pantalla === "compras" && (
+      {pantallaActiva === "compras" && (
         <Compras setPantalla={setPantalla} />
       )}
 
-      {pantalla === "vender" && (
+      {pantallaActiva === "vender" && (
         <Vender setPantalla={setPantalla} />
       )}
 
-      {pantalla === "inventario" && (
+      {pantallaActiva === "inventario" && (
         <Inventario setPantalla={setPantalla} />
       )}
 
-      {pantalla === "vencimientos" && (
+      {pantallaActiva === "vencimientos" && (
         <Vencimientos setPantalla={setPantalla} />
       )}
 
-      {pantalla === "reportes" && (
+      {pantallaActiva === "reportes" && (
         <Reportes setPantalla={setPantalla} />
       )}
 
-      {pantalla === "configuracion" && (
+      {pantallaActiva === "configuracion" && (
         <Configuracion setPantalla={setPantalla} />
       )}
 

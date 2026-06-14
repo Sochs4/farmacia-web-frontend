@@ -12,8 +12,15 @@ import {
   Trash2,
   X,
 } from "lucide-react";
+import { esAdmin, obtenerUsuarioActual } from "../utils/permisos";
 
-function TablaVentas({ lista, obtenerFecha, verDetalle, confirmarEliminar }) {
+function TablaVentas({
+  lista,
+  obtenerFecha,
+  verDetalle,
+  confirmarEliminar,
+  puedeEliminar,
+}) {
   return (
     <table className="tabla productos-tabla">
       <thead>
@@ -38,12 +45,14 @@ function TablaVentas({ lista, obtenerFecha, verDetalle, confirmarEliminar }) {
                 <Eye size={16} />
               </button>
 
-              <button
-                className="btn-delete"
-                onClick={() => confirmarEliminar(v.id)}
-              >
-                <Trash2 size={16} />
-              </button>
+              {puedeEliminar && (
+                <button
+                  className="btn-delete"
+                  onClick={() => confirmarEliminar(v.id)}
+                >
+                  <Trash2 size={16} />
+                </button>
+              )}
             </td>
           </tr>
         ))}
@@ -53,6 +62,8 @@ function TablaVentas({ lista, obtenerFecha, verDetalle, confirmarEliminar }) {
 }
 
 function Reportes({ setPantalla }) {
+  const usuario = obtenerUsuarioActual();
+  const puedeEliminar = esAdmin(usuario);
   const [ventas, setVentas] = useState([]);
   const [tab, setTab] = useState("hoy");
   const [fechaSemana, setFechaSemana] = useState("");
@@ -151,20 +162,27 @@ function Reportes({ setPantalla }) {
         </div>
       </div>
 
-      <div className="report-tabs">
-        <button className={tab === "hoy" ? "activo" : ""} onClick={() => setTab("hoy")}>
-          Hoy
-        </button>
-        <button className={tab === "semana" ? "activo" : ""} onClick={() => setTab("semana")}>
-          Semana
-        </button>
-        <button className={tab === "mes" ? "activo" : ""} onClick={() => setTab("mes")}>
-          Mes
-        </button>
-        <button className={tab === "historial" ? "activo" : ""} onClick={() => setTab("historial")}>
-          Historial
-        </button>
-      </div>
+      {puedeEliminar ? (
+        <div className="report-tabs">
+          <button className={tab === "hoy" ? "activo" : ""} onClick={() => setTab("hoy")}>
+            Hoy
+          </button>
+          <button className={tab === "semana" ? "activo" : ""} onClick={() => setTab("semana")}>
+            Semana
+          </button>
+          <button className={tab === "mes" ? "activo" : ""} onClick={() => setTab("mes")}>
+            Mes
+          </button>
+          <button className={tab === "historial" ? "activo" : ""} onClick={() => setTab("historial")}>
+            Historial
+          </button>
+        </div>
+      ) : (
+        <div className="productos-panel">
+          <h2>Ventas del dia</h2>
+          <p>Tu rol permite consultar solamente las ventas realizadas hoy.</p>
+        </div>
+      )}
 
       {tab === "hoy" && (
         <>
@@ -193,12 +211,13 @@ function Reportes({ setPantalla }) {
               obtenerFecha={obtenerFecha}
               verDetalle={verDetalle}
               confirmarEliminar={confirmarEliminar}
+              puedeEliminar={puedeEliminar}
             />
           </div>
         </>
       )}
 
-      {tab === "semana" && (
+      {puedeEliminar && tab === "semana" && (
         <>
           <div className="productos-panel">
             <h2>Reporte semanal</h2>
@@ -240,12 +259,13 @@ function Reportes({ setPantalla }) {
               obtenerFecha={obtenerFecha}
               verDetalle={verDetalle}
               confirmarEliminar={confirmarEliminar}
+              puedeEliminar={puedeEliminar}
             />
           </div>
         </>
       )}
 
-      {tab === "mes" && (
+      {puedeEliminar && tab === "mes" && (
         <>
           <div className="productos-panel">
             <h2>Reporte mensual</h2>
@@ -287,12 +307,13 @@ function Reportes({ setPantalla }) {
               obtenerFecha={obtenerFecha}
               verDetalle={verDetalle}
               confirmarEliminar={confirmarEliminar}
+              puedeEliminar={puedeEliminar}
             />
           </div>
         </>
       )}
 
-      {tab === "historial" && (
+      {puedeEliminar && tab === "historial" && (
         <>
           <div className="productos-panel">
             <h2>Historial general</h2>
@@ -337,6 +358,7 @@ function Reportes({ setPantalla }) {
               obtenerFecha={obtenerFecha}
               verDetalle={verDetalle}
               confirmarEliminar={confirmarEliminar}
+              puedeEliminar={puedeEliminar}
             />
           </div>
         </>
@@ -388,7 +410,7 @@ function Reportes({ setPantalla }) {
         </div>
       )}
 
-      {mostrarEliminar && (
+      {puedeEliminar && mostrarEliminar && (
         <div className="modal-bg">
           <div className="modal-box modal-small">
             <button className="modal-close" onClick={() => setMostrarEliminar(false)}>

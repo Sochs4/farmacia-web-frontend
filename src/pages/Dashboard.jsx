@@ -14,8 +14,11 @@ import {
   ClipboardList,
   LayoutDashboard,
 } from "lucide-react";
+import { esAdmin, obtenerUsuarioActual } from "../utils/permisos";
 
 function Dashboard({ setPantalla }) {
+  const usuario = obtenerUsuarioActual();
+  const admin = esAdmin(usuario);
   const [resumen, setResumen] = useState(null);
   const [productos, setProductos] = useState([]);
   const [bajoStock, setBajoStock] = useState([]);
@@ -122,13 +125,21 @@ function Dashboard({ setPantalla }) {
           <h2>Accesos rápidos</h2>
 
           <div className="quick-actions">
-            <button onClick={() => setPantalla("productos")}>
-              <Plus size={20} /> Agregar producto
+            <button onClick={() => setPantalla("vender")}>
+              <ShoppingCart size={20} /> Vender
             </button>
 
-            <button onClick={() => setPantalla("compras")}>
-              <PackagePlus size={20} /> Registrar compra
-            </button>
+            {admin && (
+              <button onClick={() => setPantalla("productos")}>
+                <Plus size={20} /> Agregar producto
+              </button>
+            )}
+
+            {admin && (
+              <button onClick={() => setPantalla("compras")}>
+                <PackagePlus size={20} /> Registrar compra
+              </button>
+            )}
 
             <button onClick={() => setPantalla("inventario")}>
               <Package size={20} /> Inventario

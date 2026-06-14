@@ -8,11 +8,92 @@ import {
   FileText,
   Settings,
   LogOut,
+  Search,
+  Bell,
+  Menu,
 } from "lucide-react";
 
 import logo from "../assets/logo.png";
+import { ROLES, obtenerUsuarioActual, puedeVerPantalla } from "../utils/permisos";
 
 function Layout({ children, setPantalla }) {
+  const usuario = obtenerUsuarioActual();
+  const vendedor = usuario?.rol === ROLES.VENDEDOR;
+
+  const opciones = [
+    {
+      pantalla: "dashboard",
+      texto: "Dashboard",
+      icono: <LayoutDashboard size={20} />,
+    },
+    {
+      pantalla: "productos",
+      texto: "Productos",
+      icono: <Pill size={20} />,
+    },
+    {
+      pantalla: "compras",
+      texto: "Compras",
+      icono: <PackagePlus size={20} />,
+    },
+    {
+      pantalla: "vender",
+      texto: "Vender",
+      icono: <CreditCard size={20} />,
+    },
+    {
+      pantalla: "inventario",
+      texto: "Inventario",
+      icono: <Boxes size={20} />,
+    },
+    {
+      pantalla: "vencimientos",
+      texto: "Vencimientos",
+      icono: <CalendarClock size={20} />,
+    },
+    {
+      pantalla: "reportes",
+      texto: "Reportes",
+      icono: <FileText size={20} />,
+    },
+    {
+      pantalla: "configuracion",
+      texto: "Configuracion",
+      icono: <Settings size={20} />,
+    },
+  ];
+
+  const opcionesVendedor = [
+    {
+      pantalla: "vender",
+      texto: "Vender",
+      icono: <CreditCard size={20} />,
+    },
+    {
+      pantalla: "inventario",
+      texto: "Buscar",
+      icono: <Search size={20} />,
+    },
+    {
+      pantalla: "vencimientos",
+      texto: "Alertas",
+      icono: <Bell size={20} />,
+    },
+    {
+      pantalla: "reportes",
+      texto: "Reportes",
+      icono: <FileText size={20} />,
+    },
+    {
+      pantalla: "configuracion",
+      texto: "Menu",
+      icono: <Menu size={20} />,
+    },
+  ];
+
+  const opcionesVisibles = (vendedor ? opcionesVendedor : opciones).filter(
+    (opcion) => puedeVerPantalla(usuario, opcion.pantalla),
+  );
 
   const cerrarSesion = () => {
     localStorage.removeItem("usuario");
@@ -21,57 +102,26 @@ function Layout({ children, setPantalla }) {
 
   return (
     <div className="layout">
-
-      <aside className="sidebar">
-
+      <aside className={vendedor ? "sidebar vendedor-sidebar" : "sidebar"}>
         <h2 className="logo-area">
           <img src={logo} alt="Logo" className="logo-img" />
         </h2>
 
-        <button onClick={() => setPantalla("dashboard")}>
-          <LayoutDashboard size={20} /> Dashboard
-        </button>
+        {opcionesVisibles.map((opcion) => (
+          <button
+            key={opcion.pantalla}
+            onClick={() => setPantalla(opcion.pantalla)}
+          >
+            {opcion.icono} {opcion.texto}
+          </button>
+        ))}
 
-        <button onClick={() => setPantalla("productos")}>
-          <Pill size={20} /> Productos
-        </button>
-
-        <button onClick={() => setPantalla("compras")}>
-          <PackagePlus size={20} /> Compras
-        </button>
-
-        <button onClick={() => setPantalla("vender")}>
-          <CreditCard size={20} /> Vender
-        </button>
-
-        <button onClick={() => setPantalla("inventario")}>
-          <Boxes size={20} /> Inventario
-        </button>
-
-        <button onClick={() => setPantalla("vencimientos")}>
-          <CalendarClock size={20} /> Vencimientos
-        </button>
-
-        <button onClick={() => setPantalla("reportes")}>
-          <FileText size={20} /> Reportes
-        </button>
-
-        {/* 🔐 CONFIGURACIÓN */}
-        <button onClick={() => setPantalla("configuracion")}>
-          <Settings size={20} /> Configuración
-        </button>
-
-        {/* 🚪 CERRAR SESIÓN */}
         <button className="logout" onClick={cerrarSesion}>
-          <LogOut size={20} /> Cerrar sesión
+          <LogOut size={20} /> Cerrar sesion
         </button>
-
       </aside>
 
-      <main className="main-content">
-        {children}
-      </main>
-
+      <main className="main-content">{children}</main>
     </div>
   );
 }
